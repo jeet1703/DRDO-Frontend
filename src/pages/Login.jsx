@@ -11,7 +11,6 @@ const Login = () => {
         <input type="password" placeholder="Password" className="text-center border p-1.5  m-2 rounded-md" />
         <button type="submit" className="bg-[#046BA4] text-white p-2 px-8 my-8 rounded-full hover:bg-[#002B62] shadow-md shadow-[#002B62] hover:shadow-inner hover:shadow-[#06090c] transition-shadow duration-300">LogIn</button>
       </form>
-
     </div>
   );
 };
