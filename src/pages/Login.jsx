@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from '../assets/logo.png';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   return (
@@ -19,12 +20,13 @@ const Login = () => {
             placeholder="Password"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#046BA4]"
           />
-          <button
+          <Link
+            to="/home"
             type="submit"
             className="bg-[#046BA4] text-white font-medium py-2 rounded-full hover:bg-[#002B62] transition duration-300"
           >
             Log In
-          </button>
+          </Link>
         </form>
       </div>
     </div>
