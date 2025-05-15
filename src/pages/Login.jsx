@@ -10,8 +10,8 @@ const Login = () => {
 
         <form className="flex flex-col gap-4">
           <input
-            type="email"
-            placeholder="Email Address"
+            type="text"
+            placeholder="Username"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#046BA4]"
           />
           <input
