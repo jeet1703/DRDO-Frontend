@@ -1,7 +1,7 @@
 // File: frontend/src/pages/Dashboard.tsx
 import React from 'react';
 
-const Dashboard: React.FC = () => {
+const Dashboard = () => {
   return (
     <div className="p-8">
       <h2 className="text-xl font-semibold mb-4">Submitted Records</h2>

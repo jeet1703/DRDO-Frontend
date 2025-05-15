@@ -1,7 +1,7 @@
 // File: frontend/src/pages/DataEntryForm.tsx
 import React from 'react';
 
-const DataEntryForm: React.FC = () => {
+const DataEntryForm = () => {
   return (
     <div className="p-8">
       <h2 className="text-xl font-semibold mb-4">Enter Record</h2>
