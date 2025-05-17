@@ -7,7 +7,9 @@ const Navbar = () => {
 
   const handleLogout = () => {
     // Clear any auth tokens or session data here if needed
-    navigate('/'); // redirect to login page
+     // redirect to login page
+    localStorage.removeItem('token'); // Clear token
+    navigate('/');
   };
 
   return (
