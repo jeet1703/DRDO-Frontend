@@ -1,49 +1,60 @@
 // src/pages/Dashboard.jsx
-import React, { useState } from "react";
+// import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const Dashboard = () => {
-  const initialProjects = [
-    {
-      id: 1,
-      projectTitle: "Design and Development of GAF HEAT for 18 30 40 Through SSP WER MAS",
-      domainExpert: "Dr. Subhash Chander",
-      institute: "Department of Physics, IIT Roorkee",
-      dateOfSanction: "27-Sep-2012",
-      cost: "₹22,05,059",
-      referenceNo: "20MPERIP/28/20",
-      recommendation: "Recommended by SSPL",
-      status: "In Process",
-      comments: "",
-    },
-    {
-      id: 2,
-      projectTitle: "Development of sensors for detection and suppression of ...",
-      domainExpert: "Dr. Anoop Kumar Shukla",
-      institute: "Amity Institute of Applied Science, Amity University, UP",
-      dateOfSanction: "13-Dec-2021",
-      cost: "₹17,75,855",
-      referenceNo: "EBIPR/965",
-      recommendation: "Recommended by SP",
-      status: "In Process",
-      comments: "",
-    },
-    {
-      id: 3,
-      projectTitle: "Infra-Red Detector using Graphene with SiNWs for Night Vision Devices",
-      domainExpert: "Dr. Avinash Kumar",
-      institute: "Amity University, UP",
-      dateOfSanction: "16-Nov-2023",
-      cost: "₹58,00,744",
-      referenceNo: "ERIP/ER/20/23080099",
-      recommendation: "Recommended by SSPL",
-      status: "In Process",
-      comments: "",
-    },
-  ];
+  // const initialProjects = [
+  //   {
+  //     id: 1,
+  //     projectTitle: "Design and Development of GAF HEAT for 18 30 40 Through SSP WER MAS",
+  //     domainExpert: "Dr. Subhash Chander",
+  //     institute: "Department of Physics, IIT Roorkee",
+  //     dateOfSanction: "27-Sep-2012",
+  //     cost: "₹22,05,059",
+  //     referenceNo: "20MPERIP/28/20",
+  //     recommendation: "Recommended by SSPL",
+  //     status: "In Process",
+  //     comments: "",
+  //   },
+  //   {
+  //     id: 2,
+  //     projectTitle: "Development of sensors for detection and suppression of ...",
+  //     domainExpert: "Dr. Anoop Kumar Shukla",
+  //     institute: "Amity Institute of Applied Science, Amity University, UP",
+  //     dateOfSanction: "13-Dec-2021",
+  //     cost: "₹17,75,855",
+  //     referenceNo: "EBIPR/965",
+  //     recommendation: "Recommended by SP",
+  //     status: "In Process",
+  //     comments: "",
+  //   },
+  //   {
+  //     id: 3,
+  //     projectTitle: "Infra-Red Detector using Graphene with SiNWs for Night Vision Devices",
+  //     domainExpert: "Dr. Avinash Kumar",
+  //     institute: "Amity University, UP",
+  //     dateOfSanction: "16-Nov-2023",
+  //     cost: "₹58,00,744",
+  //     referenceNo: "ERIP/ER/20/23080099",
+  //     recommendation: "Recommended by SSPL",
+  //     status: "In Process",
+  //     comments: "",
+  //   },
+  // ];
 
-  const [projects, setProjects] = useState(initialProjects);
+  // const [projects, setProjects] = useState(initialProjects); 
+  const [projects, setProjects] = useState([]);  // Initially empty, will be loaded from backend
+  // Fetch records from backend on component mount
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/api/dashboard/")
+      .then((res) => res.json())
+      .then((data) => setProjects(data))
+      .catch((err) => console.error("Failed to fetch projects:", err));
+  }, []);
+
 
   const handleStatusChange = (id, newStatus) => {
     setProjects((prev) =>
@@ -51,6 +62,18 @@ const Dashboard = () => {
         proj.id === id ? { ...proj, status: newStatus } : proj
       )
     );
+
+    const project = projects.find((p) => p.id === id);
+    fetch(`http://127.0.0.1:5000/api/dashboard/update/${project.referenceNo}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.error("Status update failed:", err));
+
   };
 
   const handleCommentsChange = (id, newComment) => {
@@ -61,19 +84,44 @@ const Dashboard = () => {
     );
   };
 
+  // const handleSendComment = (id) => {
+  //   const project = projects.find((p) => p.id === id);
+  //   if (project.comments.trim() === "") {
+  //     alert("Please enter a comment before sending.");
+  //     return;
+  //   }
+  //   alert(`Comment sent for project "${project.projectTitle}":\n${project.comments}`);
+  //   // Clear comment after send
+  //   setProjects((prev) =>
+  //     prev.map((proj) =>
+  //       proj.id === id ? { ...proj, comments: "" } : proj
+  //     )
+  //   );
+  // };
   const handleSendComment = (id) => {
     const project = projects.find((p) => p.id === id);
     if (project.comments.trim() === "") {
       alert("Please enter a comment before sending.");
       return;
     }
-    alert(`Comment sent for project "${project.projectTitle}":\n${project.comments}`);
-    // Clear comment after send
-    setProjects((prev) =>
-      prev.map((proj) =>
-        proj.id === id ? { ...proj, comments: "" } : proj
-      )
-    );
+
+    fetch(`http://127.0.0.1:5000/api/dashboard/update/${project.referenceNo}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ comments: project.comments }),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        alert(`Comment sent for project "${project.projectTitle}":\n${project.comments}`);
+        setProjects((prev) =>
+          prev.map((proj) =>
+            proj.id === id ? { ...proj, comments: "" } : proj
+          )
+        );
+      })
+      .catch((err) => console.error("Comment update failed:", err));
   };
 
   return (

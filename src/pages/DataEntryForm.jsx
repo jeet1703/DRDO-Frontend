@@ -22,12 +22,46 @@ const DataEntryForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Submitted:', formData);
-    alert('Form submitted successfully!');
-    // Add API call here if needed
-  };
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log('Submitted:', formData);
+  //   alert('Form submitted successfully!');
+  //   // Add API call here if needed
+  // };
+
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch('http://localhost:5000/api/form/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+      alert('Form submitted successfully!');
+      // Reset form after successful submit
+      setFormData({
+        projectTitle: '',
+        domainExpert: '',
+        institute: '',
+        dateOfSanction: '',
+        status: '',
+        cost: '',
+        referenceNo: '',
+        recommendation: '',
+      });
+    } else {
+      const errorData = await response.json();
+      alert('Error: ' + (errorData.error || 'Failed to submit form'));
+    }
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col">
