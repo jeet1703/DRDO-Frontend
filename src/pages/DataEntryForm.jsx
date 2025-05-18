@@ -34,7 +34,7 @@ const DataEntryForm = () => {
   e.preventDefault();
 
   try {
-    const response = await fetch('http://localhost:5000/api/form/records', {
+    const response = await fetch('https://drdo-backend-production.up.railway.app/api/form/records', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),

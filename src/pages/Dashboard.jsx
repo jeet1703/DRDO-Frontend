@@ -49,7 +49,7 @@
     const [projects, setProjects] = useState([]);  // Initially empty, will be loaded from backend
     // Fetch records from backend on component mount
     useEffect(() => {
-      fetch(`${API_BASE_URL}/api/dashboard/`)
+      fetch(`https://drdo-backend-production.up.railway.app/api/dashboard/`)
         .then((res) => res.json())
         .then((data) => setProjects(data))
         .catch((err) => console.error("Failed to fetch projects:", err));
@@ -64,7 +64,7 @@
       );
 
       const project = projects.find((p) => p.id === id);
-      fetch(`${API_BASE_URL}/api/dashboard/update/${project.referenceNo}`, {
+      fetch(`https://drdo-backend-production.up.railway.app/api/dashboard/update/${project.referenceNo}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@
         return;
       }
 
-      fetch(`${API_BASE_URL}/api/dashboard/update/${project.referenceNo}`, {
+      fetch(`https://drdo-backend-production.up.railway.app/api/dashboard/update/${project.referenceNo}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
