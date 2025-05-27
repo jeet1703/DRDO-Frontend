@@ -16,7 +16,7 @@ const Navbar = () => {
     <nav className="w-full bg-white shadow-md py-3 px-6 flex items-center justify-between">
       <div className="flex items-center text-black">
         <img src={logo} alt="Logo" className="w-12 h-12" />
-        <h1 className="text-xl font-bold  ml-3">DRDO Portal</h1>
+        <h1 className="text-xl font-bold  ml-3">SSPL-DRDO Portal</h1>
       </div>
 
       <div className="flex gap-4 items-center">
