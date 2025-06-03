@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import { BASE_URL } from "../Config";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
+  const [site, setSite] = useState("drdo_portal");
 
   useEffect(() => {
-    fetch(`https://drdo-backend-production.up.railway.app/api/dashboard/`)
+    const storedSite = localStorage.getItem("site") || "drdo_portal";
+    setSite(storedSite);
+
+    // Corrected: dynamically fetch from dashboard path with storedSite
+    fetch(`${BASE_URL}/api/dashboard/${storedSite}/`)
       .then((res) => res.json())
       .then((data) => setProjects(data))
       .catch((err) => console.error("Failed to fetch projects:", err));
@@ -23,23 +28,14 @@ const Dashboard = () => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
 
-    fetch(`https://drdo-backend-production.up.railway.app/api/dashboard/update/${project.referenceNo}`, {
+    // Corrected: use /api/dashboard/<site>/update
+    fetch(`${BASE_URL}/api/dashboard/${site}/update/${project.referenceNo}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     })
       .then((res) => res.json())
       .catch((err) => console.error("Status update failed:", err));
-  };
-
-  const handleCommentsChange = (id, newComment) => {
-    setProjects((prev) =>
-      prev.map((proj) =>
-        proj.id === id ? { ...proj, comments: newComment } : proj
-      )
-    );
   };
 
   const handleSendComment = (id) => {
@@ -49,16 +45,16 @@ const Dashboard = () => {
       return;
     }
 
-    fetch(`https://drdo-backend-production.up.railway.app/api/dashboard/update/${project.referenceNo}`, {
+    fetch(`${BASE_URL}/api/dashboard/${site}/update/${project.referenceNo}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ comments: project.comments }),
     })
       .then((res) => res.json())
       .then(() => {
-        alert(`Comment sent for "${project.nomenclature}":\n${project.comments}`);
+        alert(
+          `Comment sent for "${project.nomenclature}":\n${project.comments}`
+        );
         setProjects((prev) =>
           prev.map((proj) =>
             proj.id === id ? { ...proj, comments: "" } : proj
@@ -135,6 +131,22 @@ const Dashboard = () => {
                       className="bg-[#02447C] text-white px-3 rounded hover:bg-[#035a8c] transition"
                     >
                       Send
+                    </button>
+                  </div>
+                </td>
+                <td className="border p-2">
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => alert(`Viewing ${project.nomenclature}`)}
+                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-xs"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => alert(`Deleting ${project.nomenclature}`)}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-xs"
+                    >
+                      Delete
                     </button>
                   </div>
                 </td>

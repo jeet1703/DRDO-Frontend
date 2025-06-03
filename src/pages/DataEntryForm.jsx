@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import { BASE_URL } from '../Config';
 
 const DataEntryForm = () => {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const DataEntryForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://drdo-backend-production.up.railway.app/api/form/records', {
+      const response = await fetch(`${BASE_URL}/api/drdo_portal/form/records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
