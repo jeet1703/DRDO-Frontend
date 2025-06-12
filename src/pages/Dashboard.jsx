@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import { BASE_URL } from "../Config";
+import { usePDF } from 'react-to-pdf';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [site, setSite] = useState("drdo_portal");
-  const [comments, setComments] = useState({}); // Store comments by project ID
+  const [comments, setComments] = useState({});
+  const [selectedProject, setSelectedProject] = useState(null);
+  const { toPDF, targetRef } = usePDF({
+    filename: 'project-report.pdf',
+    page: {
+      margin: 20,
+      format: 'A4'
+    }
+  });
 
   useEffect(() => {
     const storedSite = localStorage.getItem("site") || "drdo_portal";
@@ -16,7 +25,6 @@ const Dashboard = () => {
       .then((res) => res.json())
       .then((data) => {
         setProjects(data);
-        // Initialize comments state with existing comments
         const commentsInit = {};
         data.forEach(project => {
           commentsInit[project.id] = project.comments || "";
@@ -67,19 +75,24 @@ const Dashboard = () => {
       .then((res) => res.json())
       .then(() => {
         alert(`Comment sent for "${project.nomenclature}":\n${comments[id]}`);
-        // Update the project's comments in state
         setProjects(prev =>
           prev.map(proj =>
             proj.id === id ? { ...proj, comments: comments[id] } : proj
           )
         );
-        // Clear the comment input
         setComments(prev => ({
           ...prev,
           [id]: ""
         }));
       })
       .catch((err) => console.error("Comment update failed:", err));
+  };
+
+  const generatePdf = (project) => {
+    setSelectedProject(project);
+    setTimeout(() => {
+      toPDF();
+    }, 100);
   };
 
   return (
@@ -162,6 +175,12 @@ const Dashboard = () => {
                 <td className="border p-2">
                   <div className="flex gap-2 justify-center">
                     <button
+                      onClick={() => generatePdf(project)}
+                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs"
+                    >
+                      PDF
+                    </button>
+                    <button
                       onClick={() => alert(`Viewing ${project.nomenclature}`)}
                       className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-xs"
                     >
@@ -179,6 +198,76 @@ const Dashboard = () => {
             ))}
           </tbody>
         </table>
+
+        {/* PDF Template (positioned off-screen) */}
+        <div 
+          ref={targetRef} 
+          style={{ position: 'absolute', left: '-9999px', width: '210mm' }}
+          className="p-8 bg-white"
+        >
+          {selectedProject && (
+            <div className="space-y-4">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-[#02447C]">PROJECT REPORT</h1>
+                <h2 className="text-xl font-semibold">{selectedProject.nomenclature}</h2>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Reference Number:</p>
+                  <p>{selectedProject.referenceNo || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Status:</p>
+                  <p>{selectedProject.status}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Academia/Institute:</p>
+                  <p>{selectedProject.institute || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">PI Name:</p>
+                  <p>{selectedProject.domainExpert || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Coordinating Lab Scientist:</p>
+                  <p>{selectedProject.recommendation || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Research Vertical:</p>
+                  <p>{selectedProject.researchVertical || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Cost (in Lakhs):</p>
+                  <p>{selectedProject.cost || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Sanctioned Date:</p>
+                  <p>{selectedProject.dateOfSanction || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Duration & PDC:</p>
+                  <p>{selectedProject.durationPDC || 'N/A'}</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="font-semibold">Stake Holding Lab/Contact:</p>
+                  <p>{selectedProject.stakeHolderLab || 'N/A'}</p>
+                </div>
+              </div>
+
+              {selectedProject.comments && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold border-b pb-1">Comments:</h3>
+                  <p className="whitespace-pre-line mt-2">{selectedProject.comments}</p>
+                </div>
+              )}
+
+              <div className="mt-8 text-sm text-gray-500 text-right">
+                <p>Generated on: {new Date().toLocaleString()}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
       <Footer />
     </div>
