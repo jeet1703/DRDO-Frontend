@@ -9,6 +9,13 @@ const Dashboard = () => {
   const [site, setSite] = useState("drdo_portal");
   const [comments, setComments] = useState({});
   const [selectedProject, setSelectedProject] = useState(null);
+  const [dateRange, setDateRange] = useState({
+    start: '',
+    end: ''
+  });
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
+  
   const { toPDF, targetRef } = usePDF({
     filename: 'project-report.pdf',
     page: {
@@ -35,11 +42,17 @@ const Dashboard = () => {
   }, []);
 
   const handleStatusChange = (id, newStatus) => {
-    setProjects((prev) =>
-      prev.map((proj) =>
-        proj.id === id ? { ...proj, status: newStatus } : proj
-      )
+    const updatedProjects = projects.map((proj) =>
+      proj.id === id ? { ...proj, status: newStatus } : proj
     );
+    setProjects(updatedProjects);
+
+    if (isFiltered) {
+      const updatedFilteredProjects = filteredProjects.map((proj) =>
+        proj.id === id ? { ...proj, status: newStatus } : proj
+      );
+      setFilteredProjects(updatedFilteredProjects);
+    }
 
     const project = projects.find((p) => p.id === id);
     if (!project) return;
@@ -75,17 +88,53 @@ const Dashboard = () => {
       .then((res) => res.json())
       .then(() => {
         alert(`Comment sent for "${project.nomenclature}":\n${comments[id]}`);
-        setProjects(prev =>
-          prev.map(proj =>
-            proj.id === id ? { ...proj, comments: comments[id] } : proj
-          )
+        const updatedProjects = projects.map(proj =>
+          proj.id === id ? { ...proj, comments: comments[id] } : proj
         );
+        setProjects(updatedProjects);
+
+        if (isFiltered) {
+          const updatedFilteredProjects = filteredProjects.map(proj =>
+            proj.id === id ? { ...proj, comments: comments[id] } : proj
+          );
+          setFilteredProjects(updatedFilteredProjects);
+        }
+
         setComments(prev => ({
           ...prev,
           [id]: ""
         }));
       })
       .catch((err) => console.error("Comment update failed:", err));
+  };
+
+  const filterProjectsByDate = () => {
+    if (!dateRange.start || !dateRange.end) {
+      alert('Please select both start and end dates');
+      return;
+    }
+
+    const startDate = new Date(dateRange.start);
+    const endDate = new Date(dateRange.end);
+
+    if (startDate > endDate) {
+      alert('Start date cannot be after end date');
+      return;
+    }
+
+    const filtered = projects.filter(project => {
+      const projectDate = new Date(project.createdAt || project.dateOfSanction);
+      return projectDate >= startDate && projectDate <= endDate;
+    });
+
+    setFilteredProjects(filtered);
+    setIsFiltered(true);
+  };
+
+  const resetDateFilter = () => {
+    setDateRange({ start: '', end: '' });
+    setIsFiltered(false);
+    setFilteredProjects([]);
   };
 
   const generatePdf = (project) => {
@@ -102,6 +151,43 @@ const Dashboard = () => {
         <h2 className="text-2xl font-semibold mb-4 text-[#02447C]">
           Submitted DIA-KCOE Project Records
         </h2>
+        
+        {/* Date Filter Controls */}
+        <div className="flex flex-wrap items-center gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <label>From:</label>
+            <input
+              type="date"
+              value={dateRange.start}
+              onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+              className="border rounded px-2 py-1"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label>To:</label>
+            <input
+              type="date"
+              value={dateRange.end}
+              onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+              className="border rounded px-2 py-1"
+            />
+          </div>
+          <button
+            onClick={filterProjectsByDate}
+            className="bg-[#02447C] text-white px-4 py-1 rounded hover:bg-[#035a8c] transition"
+          >
+            Filter
+          </button>
+          {isFiltered && (
+            <button
+              onClick={resetDateFilter}
+              className="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
         <table className="w-full border text-sm bg-white shadow table-auto min-w-[1100px]">
           <thead className="bg-[#02447C] text-white">
             <tr>
@@ -121,7 +207,7 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {projects.map((project, index) => (
+            {(isFiltered ? filteredProjects : projects).map((project, index) => (
               <tr key={project.id} className="hover:bg-blue-50">
                 <td className="border p-2">{index + 1}</td>
                 <td className="border p-2">{project.nomenclature}</td>
