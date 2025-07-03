@@ -5,6 +5,6 @@ const isLocal = true; // ⬅️ Change this to false to use Railway
 
 export const BASE_URL = isLocal
   ? "http://localhost:5000" // your local Flask server
-  : "hhttps://drdo-backend-djgh.onrender.com";
+  : "https://drdo-backend-djgh.onrender.com";
 
 export default BASE_URL;
