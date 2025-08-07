@@ -1,18 +1,18 @@
 // src/pages/DataEntryForm.jsx
-import React, { useState } from 'react';
-import Navbar from '../Components/Navbar';
-import Footer from '../Components/Footer';
+import React, { useState } from "react";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 
 const DataEntryForm = () => {
   const [formData, setFormData] = useState({
-    projectTitle: '',
-    domainExpert: '',
-    institute: '',
-    dateOfSanction: '',
-    status: '',
-    cost: '',
-    referenceNo: '',
-    recommendation: '',
+    projectTitle: "",
+    domainExpert: "",
+    institute: "",
+    dateOfSanction: "",
+    status: "",
+    cost: "",
+    referenceNo: "",
+    recommendation: "",
   });
 
   const handleChange = (e) => {
@@ -22,18 +22,56 @@ const DataEntryForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitted:', formData);
-    alert('Form submitted successfully!');
-    // Add API call here if needed
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/form/drdo_portal/records",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error submitting form:", errorData);
+        alert("Failed to submit form. Please try again.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Submitted:", data);
+      alert("Form submitted successfully!");
+
+      // Reset form after successful submission
+      setFormData({
+        projectTitle: "",
+        domainExpert: "",
+        institute: "",
+        dateOfSanction: "",
+        status: "",
+        cost: "",
+        referenceNo: "",
+        recommendation: "",
+      });
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      alert("An error occurred while submitting. Please try again.");
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="p-8 max-w-3xl mx-auto flex-grow">
-        <h2 className="text-2xl font-semibold mb-6 text-[#02447C]">Enter New ER & IPR Project Record</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-[#02447C]">
+          Enter New ER & IPR Project Record
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
