@@ -27,6 +27,7 @@ const Dashboard = () => {
       .then((res) => res.json())
       .then((data) => {
         setProjects(data);
+        console.log("Fetched projects:", data);
         const initComments = {};
         data.forEach((proj) => {
           initComments[proj.id] = proj.comments || "";
